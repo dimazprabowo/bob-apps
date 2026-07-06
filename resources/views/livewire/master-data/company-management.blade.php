@@ -196,7 +196,7 @@
                                 loadingText="Menyimpan..." class="w-full sm:w-auto">
                                 {{ $editMode ? 'Update' : 'Simpan' }}
                             </x-loading-button>
-                            <x-cancel-button @click="$wire.closeModal()" target="closeModal"
+                            <x-cancel-button wire:click="closeModal" target="closeModal"
                                 class="mt-3 sm:mt-0 w-full sm:w-auto" />
                         </div>
                     </form>
