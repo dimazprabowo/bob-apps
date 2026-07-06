@@ -1,0 +1,62 @@
+<?php
+
+namespace App\Livewire\Profile;
+
+use App\Livewire\Traits\HasNotification;
+use App\Models\User;
+use App\Services\ImpersonateService;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Livewire\Component;
+use Livewire\WithPagination;
+use Spatie\Permission\Models\Role;
+
+class ImpersonateUser extends Component
+{
+    use WithPagination, AuthorizesRequests, HasNotification;
+
+    protected $paginationTheme = 'tailwind';
+
+    public string $search = '';
+    public string $roleFilter = '';
+
+    public function updatingSearch(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatingRoleFilter(): void
+    {
+        $this->resetPage();
+    }
+
+    public function startImpersonate(int $userId, ImpersonateService $service): void
+    {
+        abort_unless(auth()->user()->can('users_impersonate'), 403);
+        abort_if($service->isImpersonating(), 403, 'Anda sedang dalam sesi impersonate.');
+
+        $target = User::findOrFail($userId);
+        $this->authorize('impersonate', $target);
+
+        $service->start($target);
+
+        $this->notifySuccess("Anda sekarang beraksi sebagai {$target->name}.");
+        $this->redirect(route('dashboard'), navigate: true);
+    }
+
+    public function render()
+    {
+        abort_unless(auth()->user()->can('users_impersonate'), 403);
+
+        $query = User::query()
+            ->when($this->search, fn($q) => $q->where('name', 'ilike', "%{$this->search}%")
+                ->orWhere('email', 'ilike', "%{$this->search}%"))
+            ->when($this->roleFilter, fn($q) => $q->role($this->roleFilter))
+            ->where('id', '!=', auth()->id())
+            ->orderBy('name');
+
+        return view('livewire.profile.impersonate-user', [
+            'users' => $query->paginate(8),
+            'roles' => Role::orderBy('name')->get(),
+        ]);
+    }
+}
