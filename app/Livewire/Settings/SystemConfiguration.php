@@ -60,10 +60,18 @@ class SystemConfiguration extends Component
         $this->filterChanged = true;
     }
 
-    public function updatedIsActiveFilter()
+    public function updatingIsActiveFilter()
     {
         $this->resetPage();
         $this->filterChanged = true;
+    }
+
+    public function resetFilters()
+    {
+        $this->isActiveFilter = '';
+        $this->resetPage();
+        $this->filterChanged = true;
+        $this->notifySuccess('Filter berhasil direset.');
     }
 
     public function getIsActiveOptionsProperty(): array

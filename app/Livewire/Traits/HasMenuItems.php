@@ -5,8 +5,10 @@ namespace App\Livewire\Traits;
 use App\Models\Chat;
 use App\Models\Company;
 use App\Models\Notification;
+use App\Models\Room;
 use App\Models\SystemConfiguration;
 use App\Models\User;
+use App\Models\Vehicle;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Spatie\Permission\Models\Role;
@@ -28,6 +30,12 @@ trait HasMenuItems
         $perms = [
             'dashboard_view'     => Gate::allows('viewStats'),
             'companies_view'     => Gate::allows('viewAny', Company::class),
+            'vehicles_view'      => Gate::allows('viewAny', Vehicle::class),
+            'rooms_view'         => Gate::allows('viewAny', Room::class),
+            'vehicle_bookings_view' => $user->can('vehicle_bookings_view'),
+            'zoom_bookings_view'    => $user->can('zoom_bookings_view'),
+            'room_bookings_view'    => $user->can('room_bookings_view'),
+            'reports_view'          => $user->can('reports_view'),
             'notifications_view' => Gate::allows('viewAny', Notification::class),
             'notifications_send' => Gate::allows('send', Notification::class),
             'chat_view'          => Gate::allows('viewAny', Chat::class),
@@ -56,12 +64,85 @@ trait HasMenuItems
                 'active' => $req->routeIs('master-data.companies'),
             ];
         }
+        if ($perms['vehicles_view']) {
+            $masterDataChildren[] = [
+                'name'   => 'Armada',
+                'route'  => 'master-data.vehicles',
+                'active' => $req->routeIs('master-data.vehicles'),
+            ];
+        }
+        if ($perms['rooms_view']) {
+            $masterDataChildren[] = [
+                'name'   => 'Ruangan',
+                'route'  => 'master-data.rooms',
+                'active' => $req->routeIs('master-data.rooms'),
+            ];
+        }
         if (!empty($masterDataChildren)) {
             $items[] = [
                 'name'     => 'Master Data',
                 'icon'     => 'database',
                 'active'   => $req->routeIs('master-data.*'),
                 'children' => $masterDataChildren,
+            ];
+        }
+
+        // Booking Management
+        $bookingChildren = [];
+        if ($perms['vehicle_bookings_view']) {
+            $bookingChildren[] = [
+                'name'   => 'Booking Armada',
+                'route'  => 'bookings.armada.index',
+                'active' => $req->routeIs('bookings.armada.*'),
+            ];
+        }
+        if ($perms['zoom_bookings_view']) {
+            $bookingChildren[] = [
+                'name'   => 'Booking Zoom',
+                'route'  => 'bookings.zoom.index',
+                'active' => $req->routeIs('bookings.zoom.*'),
+            ];
+        }
+        if ($perms['room_bookings_view']) {
+            $bookingChildren[] = [
+                'name'   => 'Booking Ruangan',
+                'route'  => 'bookings.ruangan.index',
+                'active' => $req->routeIs('bookings.ruangan.*'),
+            ];
+        }
+        if (!empty($bookingChildren)) {
+            $items[] = [
+                'name'     => 'Booking',
+                'icon'     => 'clipboard-check',
+                'active'   => $req->routeIs('bookings.*'),
+                'children' => $bookingChildren,
+            ];
+        }
+
+        // Reporting
+        if ($perms['reports_view']) {
+            $reportChildren = [
+                [
+                    'name'   => 'Laporan Armada',
+                    'route'  => 'reports.armada',
+                    'active' => $req->routeIs('reports.armada', 'reports.armada.show'),
+                ],
+                [
+                    'name'   => 'Laporan Zoom',
+                    'route'  => 'reports.zoom',
+                    'active' => $req->routeIs('reports.zoom', 'reports.zoom.show'),
+                ],
+                [
+                    'name'   => 'Laporan Ruangan',
+                    'route'  => 'reports.ruangan',
+                    'active' => $req->routeIs('reports.ruangan', 'reports.ruangan.show'),
+                ],
+            ];
+            $items[] = [
+                'name'     => 'Reporting',
+                'icon'     => 'chart-bar',
+                'active'   => $req->routeIs('reports.*'),
+                'children' => $reportChildren,
             ];
         }
 

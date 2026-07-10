@@ -94,6 +94,14 @@ class CompanyManagement extends Component
         $this->filterChanged = true;
     }
 
+    public function resetFilters()
+    {
+        $this->statusFilter = '';
+        $this->resetPage();
+        $this->filterChanged = true;
+        $this->notifySuccess('Filter berhasil direset.');
+    }
+
     public function getStatusOptionsProperty(): array
     {
         return collect(CompanyStatus::cases())->map(fn ($case) => [

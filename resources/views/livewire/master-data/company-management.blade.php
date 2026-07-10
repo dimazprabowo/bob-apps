@@ -6,15 +6,18 @@
                 class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
         </div>
 
-        <!-- Filter Status -->
-        <div class="w-full md:w-44">
-            <x-searchable-select
-                wire:model.live="statusFilter"
-                :options="$this->statusOptions"
-                placeholder="Semua Status"
-                searchPlaceholder="Cari status..."
-            />
-        </div>
+        <!-- Filter Popover -->
+        <x-filter-popover :filters="['statusFilter']">
+            <div>
+                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Status</label>
+                <x-searchable-select
+                    wire:model.live="statusFilter"
+                    :options="$this->statusOptions"
+                    placeholder="Semua Status"
+                    searchPlaceholder="Cari status..."
+                />
+            </div>
+        </x-filter-popover>
 
         <!-- Action Buttons -->
         <div class="flex items-center gap-2 w-full md:w-auto">
@@ -61,7 +64,7 @@
                 </thead>
                 <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                     @forelse($companies as $company)
-                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                        <tr wire:key="company-{{ $company->id }}" class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex items-center">
                                     <div class="flex-shrink-0 h-10 w-10">

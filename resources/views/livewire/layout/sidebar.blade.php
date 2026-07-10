@@ -24,10 +24,8 @@
             <div class="flex items-center h-16 px-4"
                  :class="Alpine.store('sidebar').collapsed ? 'lg:justify-center lg:px-2' : 'justify-between'">
                 <a href="{{ route('dashboard') }}" class="flex items-center space-x-2" :class="Alpine.store('sidebar').collapsed && 'lg:justify-center lg:space-x-0'">
-                    <div class="w-9 h-9 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"/>
-                        </svg>
+                    <div class="w-9 h-9 bg-white rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden p-1">
+                        <img src="{{ asset('images/bki-main.webp') }}" alt="BKI Logo" class="w-full h-full object-contain">
                     </div>
                     {{-- App name: always visible on mobile, hidden on desktop when collapsed --}}
                     <div class="leading-tight" :class="Alpine.store('sidebar').collapsed && 'lg:hidden'">

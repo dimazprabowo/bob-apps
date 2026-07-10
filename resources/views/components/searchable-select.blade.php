@@ -15,6 +15,7 @@
 @php
     $componentId = $id ?? 'searchable-select-' . uniqid();
     $wireModel = $attributes->wire('model')->value();
+    $isLive = $attributes->wire('model')->hasModifier('live');
 @endphp
 
 <div
@@ -22,7 +23,7 @@
         open: false,
         search: '',
         dropUp: false,
-        value: @entangle($wireModel),
+        value: @entangle($wireModel){{ $isLive ? '.live' : '' }},
         options: @js($options),
         placeholder: @js($placeholder),
 

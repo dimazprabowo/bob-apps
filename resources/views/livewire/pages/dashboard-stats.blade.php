@@ -75,6 +75,71 @@
 
     </div>
 
+    {{-- Booking Stats --}}
+    @if(isset($totalBookings))
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Total Booking</p>
+                    <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ number_format($totalBookings) }}</p>
+                    <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">Semua booking</p>
+                </div>
+                <div class="p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl">
+                    <svg class="w-8 h-8 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Booking Armada</p>
+                    <p class="mt-2 text-3xl font-bold text-blue-600 dark:text-blue-400">{{ $vehicleStats['total_bookings'] }}</p>
+                    <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ $vehicleStats['pending_bookings'] }} pending</p>
+                </div>
+                <div class="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
+                    <svg class="w-8 h-8 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 17h8m-8 0a2 2 0 11-4 0m4 0a2 2 0 10-4 0m12 0a2 2 0 11-4 0m4 0a2 2 0 10-4 0M3 17V8a1 1 0 011-1h10v10"/></svg>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Booking Zoom</p>
+                    <p class="mt-2 text-3xl font-bold text-purple-600 dark:text-purple-400">{{ $zoomStats['total_bookings'] }}</p>
+                    <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ $zoomStats['pending_bookings'] }} pending</p>
+                </div>
+                <div class="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-xl">
+                    <svg class="w-8 h-8 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Booking Ruangan</p>
+                    <p class="mt-2 text-3xl font-bold text-emerald-600 dark:text-emerald-400">{{ $roomStats['total_bookings'] }}</p>
+                    <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ $roomStats['pending_bookings'] }} pending</p>
+                </div>
+                <div class="p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl">
+                    <svg class="w-8 h-8 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5"/></svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Pending Approvals Alert --}}
+    @if($pendingApprovals > 0)
+    <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4 flex items-center gap-3">
+        <svg class="w-6 h-6 text-amber-600 dark:text-amber-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        <div>
+            <p class="text-sm font-semibold text-amber-900 dark:text-amber-200">Ada {{ $pendingApprovals }} booking menunggu persetujuan</p>
+            <p class="text-xs text-amber-700 dark:text-amber-300">Silakan periksa dan tindak lanjuti</p>
+        </div>
+    </div>
+    @endif
+    @endif
+
     {{-- Quick Actions --}}
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
         <h3 class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-4">Aksi Cepat</h3>

@@ -61,6 +61,36 @@ class User extends Authenticatable implements MustVerifyEmail
             ->withTimestamps();
     }
 
+    public function vehicleBookings(): HasMany
+    {
+        return $this->hasMany(VehicleBooking::class);
+    }
+
+    public function zoomBookings(): HasMany
+    {
+        return $this->hasMany(ZoomBooking::class);
+    }
+
+    public function roomBookings(): HasMany
+    {
+        return $this->hasMany(RoomBooking::class);
+    }
+
+    public function approvedVehicleBookings(): HasMany
+    {
+        return $this->hasMany(VehicleBooking::class, 'approved_by');
+    }
+
+    public function approvedZoomBookings(): HasMany
+    {
+        return $this->hasMany(ZoomBooking::class, 'approved_by');
+    }
+
+    public function approvedRoomBookings(): HasMany
+    {
+        return $this->hasMany(RoomBooking::class, 'approved_by');
+    }
+
     // Scopes
     public function scopeActive($query)
     {

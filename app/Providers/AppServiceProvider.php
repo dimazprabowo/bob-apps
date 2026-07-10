@@ -6,15 +6,25 @@ use App\Models\Chat;
 use App\Models\ChatMessage;
 use App\Models\Company;
 use App\Models\Notification;
+use App\Models\Room;
+use App\Models\RoomBooking;
 use App\Models\SystemConfiguration;
 use App\Models\User;
+use App\Models\Vehicle;
+use App\Models\VehicleBooking;
+use App\Models\ZoomBooking;
 use App\Policies\ChatPolicy;
 use App\Policies\CompanyPolicy;
 use App\Policies\DashboardPolicy;
 use App\Policies\NotificationPolicy;
 use App\Policies\RolePolicy;
+use App\Policies\RoomBookingPolicy;
+use App\Policies\RoomPolicy;
 use App\Policies\SystemConfigurationPolicy;
 use App\Policies\UserPolicy;
+use App\Policies\VehicleBookingPolicy;
+use App\Policies\VehiclePolicy;
+use App\Policies\ZoomBookingPolicy;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
@@ -43,6 +53,11 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Notification::class, NotificationPolicy::class);
         Gate::policy(Chat::class, ChatPolicy::class);
         Gate::policy(ChatMessage::class, ChatPolicy::class);
+        Gate::policy(Vehicle::class, VehiclePolicy::class);
+        Gate::policy(VehicleBooking::class, VehicleBookingPolicy::class);
+        Gate::policy(ZoomBooking::class, ZoomBookingPolicy::class);
+        Gate::policy(Room::class, RoomPolicy::class);
+        Gate::policy(RoomBooking::class, RoomBookingPolicy::class);
 
         // Dashboard policy — bound to a string key (no Eloquent model)
         Gate::define('viewStats', [DashboardPolicy::class, 'viewStats']);

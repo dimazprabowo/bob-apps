@@ -37,6 +37,54 @@ class PermissionSeeder extends Seeder
             'companies_export_excel',
             'companies_export_pdf',
 
+            // Master Data — Armada (Vehicles)
+            'vehicles_view',
+            'vehicles_create',
+            'vehicles_update',
+            'vehicles_delete',
+            'vehicles_export_excel',
+            'vehicles_export_pdf',
+
+            // Master Data — Ruangan (Rooms)
+            'rooms_view',
+            'rooms_create',
+            'rooms_update',
+            'rooms_delete',
+            'rooms_export_excel',
+            'rooms_export_pdf',
+
+            // Booking Armada (Vehicle Bookings)
+            'vehicle_bookings_view',
+            'vehicle_bookings_create',
+            'vehicle_bookings_update',
+            'vehicle_bookings_delete',
+            'vehicle_bookings_approve',
+            'vehicle_bookings_export_excel',
+            'vehicle_bookings_export_pdf',
+
+            // Booking Zoom (Zoom Bookings)
+            'zoom_bookings_view',
+            'zoom_bookings_create',
+            'zoom_bookings_update',
+            'zoom_bookings_delete',
+            'zoom_bookings_approve',
+            'zoom_bookings_export_excel',
+            'zoom_bookings_export_pdf',
+
+            // Booking Ruangan (Room Bookings)
+            'room_bookings_view',
+            'room_bookings_create',
+            'room_bookings_update',
+            'room_bookings_delete',
+            'room_bookings_approve',
+            'room_bookings_export_excel',
+            'room_bookings_export_pdf',
+
+            // Reporting
+            'reports_view',
+            'reports_export_excel',
+            'reports_export_pdf',
+
             // Konfigurasi System
             'configuration_view',
             'configuration_update',

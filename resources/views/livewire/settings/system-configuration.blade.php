@@ -6,15 +6,18 @@
                 class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
         </div>
 
-        <!-- Status Aktif Filter -->
-        <div class="w-full md:w-36">
-            <x-searchable-select
-                wire:model.live="isActiveFilter"
-                :options="$this->isActiveOptions"
-                placeholder="Semua Status"
-                searchPlaceholder="Cari status..."
-            />
-        </div>
+        <!-- Filter Popover -->
+        <x-filter-popover :filters="['isActiveFilter']">
+            <div>
+                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Status</label>
+                <x-searchable-select
+                    wire:model.live="isActiveFilter"
+                    :options="$this->isActiveOptions"
+                    placeholder="Semua Status"
+                    searchPlaceholder="Cari status..."
+                />
+            </div>
+        </x-filter-popover>
 
         <!-- Action Buttons -->
         <div class="flex items-center gap-2 w-full md:w-auto">
@@ -52,7 +55,7 @@
                 </thead>
                 <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                     @forelse($configurations as $config)
-                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                        <tr wire:key="config-{{ $config->id }}" class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $config->key }}</div>
                                 @if($config->description)
@@ -169,11 +172,12 @@
                                             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
                                         <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Pilih tanggal dan waktu. Kosongkan jika tidak ada batas waktu.</p>
                                     @elseif($data_type === 'boolean')
-                                        <select wire:model="value"
-                                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
-                                            <option value="1">Ya (True)</option>
-                                            <option value="0">Tidak (False)</option>
-                                        </select>
+                                        <x-searchable-select
+                                            wire:model="value"
+                                            :options="[['value' => '1', 'label' => 'Ya (True)'], ['value' => '0', 'label' => 'Tidak (False)']]"
+                                            placeholder="Pilih nilai..."
+                                            searchPlaceholder="Cari..."
+                                        />
                                     @elseif($data_type === 'integer')
                                         <input wire:model="value" type="number"
                                             placeholder="Masukkan nilai numerik"
