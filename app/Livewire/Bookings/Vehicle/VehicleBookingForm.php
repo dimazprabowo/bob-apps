@@ -70,6 +70,20 @@ class VehicleBookingForm extends Component
         $this->booking_date = $date;
     }
 
+    public function updatedVehicleId($value): void
+    {
+        if ($value && $this->booking_date) {
+            if (app(VehicleBookingService::class)->checkConflict((int) $value, $this->booking_date, (int) $this->duration)) {
+                $this->notifyError("Kendaraan ini sudah dibooking pada rentang tanggal tersebut. Silakan pilih tanggal lain.");
+            }
+        }
+    }
+
+    public function updatedBookingDate($value): void
+    {
+        $this->dispatch('booking-date-updated', date: $value);
+    }
+
     public function updatedDuration($value): void
     {
         $this->dispatch('duration-updated', duration: (int) $value);
@@ -112,6 +126,12 @@ class VehicleBookingForm extends Component
             $this->logBookingError('Vehicle', $e);
             $this->notifyError('Terjadi kesalahan sistem. Silakan coba lagi.');
         }
+    }
+
+    public function resetForm(): void
+    {
+        $this->showSuccess = false;
+        $this->successBookingCode = null;
     }
 
     public function render()

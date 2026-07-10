@@ -24,7 +24,7 @@
             Tanggal <span class="text-red-500">*</span>
         </label>
         <input wire:model="booking_form_date" type="date"
-            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 dark:bg-gray-700 dark:text-white">
         @error('booking_form_date') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
     </div>
 
@@ -34,7 +34,7 @@
                 Jam Mulai <span class="text-red-500">*</span>
             </label>
             <input wire:model="start_time" type="time"
-                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 dark:bg-gray-700 dark:text-white">
             @error('start_time') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
         </div>
         <div>
@@ -42,7 +42,7 @@
                 Jam Selesai <span class="text-red-500">*</span>
             </label>
             <input wire:model="end_time" type="time"
-                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 dark:bg-gray-700 dark:text-white">
             @error('end_time') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
         </div>
     </div>
@@ -52,7 +52,7 @@
             Tujuan / Keperluan <span class="text-red-500">*</span>
         </label>
         <input wire:model="purpose" type="text"
-            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 dark:bg-gray-700 dark:text-white"
             placeholder="Tujuan penggunaan ruangan">
         @error('purpose') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
     </div>
@@ -62,7 +62,7 @@
             Jumlah Peserta <span class="text-red-500">*</span>
         </label>
         <input wire:model="participants" type="number" min="1" max="200"
-            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 dark:bg-gray-700 dark:text-white"
             placeholder="Jumlah peserta">
         @error('participants') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
     </div>
@@ -70,7 +70,7 @@
     <div>
         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Catatan (Opsional)</label>
         <textarea wire:model="notes" rows="3"
-            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 dark:bg-gray-700 dark:text-white"
             placeholder="Catatan tambahan"></textarea>
         @error('notes') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
     </div>

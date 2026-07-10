@@ -68,6 +68,11 @@ class ZoomBookingForm extends Component
         $this->booking_date = $date;
     }
 
+    public function updatedBookingDate($value): void
+    {
+        $this->dispatch('booking-date-updated', date: $value);
+    }
+
     public function updatedStartTime(): void
     {
         $this->dispatch('time-updated', startTime: $this->start_time, endTime: $this->end_time);
@@ -117,6 +122,12 @@ class ZoomBookingForm extends Component
             $this->logBookingError('Zoom', $e);
             $this->notifyError('Terjadi kesalahan sistem. Silakan coba lagi.');
         }
+    }
+
+    public function resetForm(): void
+    {
+        $this->showSuccess = false;
+        $this->successBookingCode = null;
     }
 
     public function render()

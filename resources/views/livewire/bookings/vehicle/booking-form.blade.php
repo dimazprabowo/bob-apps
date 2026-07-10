@@ -52,8 +52,12 @@
                     </div>
                     <p class="text-xs text-gray-400 dark:text-gray-500 mb-6">Simpan kode booking untuk cek status. Anda akan dihubungi oleh admin untuk konfirmasi.</p>
                     <div class="flex flex-col sm:flex-row gap-3 justify-center">
-                        <a href="{{ route('booking.check-status') }}" wire:navigate class="px-6 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors inline-flex items-center justify-center gap-2">Cek Status</a>
-                        <button wire:click="$set('showSuccess', false)" class="px-6 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-semibold hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Booking Lagi</button>
+                        <x-navigate-button href="{{ route('booking.check-status') }}" variant="primary" size="lg" loadingText="Memuat..." class="flex-1 sm:flex-none">
+                            Cek Status
+                        </x-navigate-button>
+                        <x-loading-button wire:click="resetForm" target="resetForm" variant="secondary" size="lg" loadingText="Memuat..." class="flex-1 sm:flex-none">
+                            Booking Lagi
+                        </x-loading-button>
                     </div>
                 </div>
             @else
@@ -85,14 +89,14 @@
                             @error('vehicle_id') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                         </div>
 
-                        <livewire:bookings.booking-availability :type="'vehicle'" :resourceId="$vehicle_id" :duration="(int)$duration" :key="'vehicle-avail-' . $vehicle_id" />
+                        <livewire:bookings.booking-availability :type="'vehicle'" :resourceId="$vehicle_id" :duration="(int)$duration" :bookingDate="$booking_date" :key="'vehicle-avail-' . $vehicle_id" />
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                     Tanggal Booking <span class="text-red-500">*</span>
                                 </label>
-                                <input wire:model="booking_date" type="date"
+                                <input wire:model.live="booking_date" type="date"
                                     class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
                                 @error('booking_date') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                             </div>
@@ -132,9 +136,10 @@
                                 </x-slot:icon>
                                 Ajukan Booking
                             </x-loading-button>
-                            <a href="{{ route('booking.check-status') }}" wire:navigate class="px-6 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-semibold hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-center">
+                            <x-navigate-button href="{{ route('booking.check-status') }}" variant="secondary" size="lg" loadingText="Memuat..." class="flex-1">
+                                <x-slot:icon><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg></x-slot:icon>
                                 Cek Status Booking
-                            </a>
+                            </x-navigate-button>
                         </div>
                     </form>
                 </div>

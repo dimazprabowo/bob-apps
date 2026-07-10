@@ -52,8 +52,12 @@
                     </div>
                     <p class="text-xs text-gray-400 dark:text-gray-500 mb-6">Simpan kode booking untuk cek status.</p>
                     <div class="flex flex-col sm:flex-row gap-3 justify-center">
-                        <a href="{{ route('booking.check-status') }}" wire:navigate class="px-6 py-2.5 bg-emerald-600 text-white rounded-lg text-sm font-semibold hover:bg-emerald-700 transition-colors inline-flex items-center justify-center gap-2">Cek Status</a>
-                        <button wire:click="$set('showSuccess', false)" class="px-6 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-semibold hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Booking Lagi</button>
+                        <x-navigate-button href="{{ route('booking.check-status') }}" variant="success" size="lg" loadingText="Memuat..." class="flex-1 sm:flex-none">
+                            Cek Status
+                        </x-navigate-button>
+                        <x-loading-button wire:click="resetForm" target="resetForm" variant="secondary" size="lg" loadingText="Memuat..." class="flex-1 sm:flex-none">
+                            Booking Lagi
+                        </x-loading-button>
                     </div>
                 </div>
             @else
@@ -85,14 +89,14 @@
                             @error('room_id') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                         </div>
 
-                        <livewire:bookings.booking-availability :type="'room'" :resourceId="$room_id" :key="'room-avail-' . $room_id" />
+                        <livewire:bookings.booking-availability :type="'room'" :resourceId="$room_id" :bookingDate="$booking_date" :key="'room-avail-' . $room_id" />
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                 Tanggal <span class="text-red-500">*</span>
                             </label>
-                            <input wire:model="booking_date" type="date"
-                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
+                            <input wire:model.live="booking_date" type="date"
+                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 dark:bg-gray-700 dark:text-white">
                             @error('booking_date') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                         </div>
 
@@ -102,7 +106,7 @@
                                     Jam Mulai <span class="text-red-500">*</span>
                                 </label>
                                 <input wire:model="start_time" type="time"
-                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
+                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 dark:bg-gray-700 dark:text-white">
                                 @error('start_time') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                             </div>
                             <div>
@@ -110,7 +114,7 @@
                                     Jam Selesai <span class="text-red-500">*</span>
                                 </label>
                                 <input wire:model="end_time" type="time"
-                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
+                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 dark:bg-gray-700 dark:text-white">
                                 @error('end_time') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                             </div>
                         </div>
@@ -120,7 +124,7 @@
                                 Tujuan / Keperluan <span class="text-red-500">*</span>
                             </label>
                             <input wire:model="purpose" type="text"
-                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 dark:bg-gray-700 dark:text-white"
                                 placeholder="Tujuan penggunaan ruangan">
                             @error('purpose') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                         </div>
@@ -130,7 +134,7 @@
                                 Jumlah Peserta <span class="text-red-500">*</span>
                             </label>
                             <input wire:model="participants" type="number" min="1" max="200"
-                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 dark:bg-gray-700 dark:text-white"
                                 placeholder="Jumlah peserta">
                             @error('participants') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                         </div>
@@ -138,7 +142,7 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Catatan (Opsional)</label>
                             <textarea wire:model="notes" rows="3"
-                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 dark:bg-gray-700 dark:text-white"
                                 placeholder="Catatan tambahan"></textarea>
                             @error('notes') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                         </div>
@@ -148,9 +152,10 @@
                                 <x-slot:icon><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg></x-slot:icon>
                                 Ajukan Booking
                             </x-loading-button>
-                            <a href="{{ route('booking.check-status') }}" wire:navigate class="px-6 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-semibold hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-center">
+                            <x-navigate-button href="{{ route('booking.check-status') }}" variant="secondary" size="lg" loadingText="Memuat..." class="flex-1">
+                                <x-slot:icon><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg></x-slot:icon>
                                 Cek Status Booking
-                            </a>
+                            </x-navigate-button>
                         </div>
                     </form>
                 </div>

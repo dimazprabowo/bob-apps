@@ -20,7 +20,7 @@ class BookingAvailability extends Component
     public ?string $startTime = null;
     public ?string $endTime = null;
 
-    protected $listeners = ['time-updated' => 'syncTimes', 'duration-updated' => 'syncDuration'];
+    protected $listeners = ['time-updated' => 'syncTimes', 'duration-updated' => 'syncDuration', 'booking-date-updated' => 'setDateFromInput'];
 
     public function syncDuration(int $duration): void
     {
@@ -34,20 +34,34 @@ class BookingAvailability extends Component
         $this->checkConflict();
     }
 
-    public function mount(string $type, ?int $resourceId = null, int $duration = 1): void
+    public function mount(string $type, ?int $resourceId = null, int $duration = 1, ?string $bookingDate = null): void
     {
         $this->type = $type;
         $this->resourceId = $resourceId;
         $this->duration = max(1, $duration);
-        $this->currentMonth = now()->format('Y-m');
+
+        if ($bookingDate) {
+            $this->selectedDate = $bookingDate;
+            $this->currentMonth = \Carbon\Carbon::parse($bookingDate)->format('Y-m');
+        } else {
+            $this->currentMonth = now()->format('Y-m');
+        }
+
         $this->loadBookedDates();
+
+        if ($this->selectedDate) {
+            $this->loadBookedSlots();
+        }
     }
 
     public function updatedResourceId(): void
     {
-        $this->selectedDate = '';
         $this->bookedSlots = [];
         $this->loadBookedDates();
+
+        if ($this->selectedDate) {
+            $this->loadBookedSlots();
+        }
     }
 
     public function updatedCurrentMonth(): void
@@ -65,6 +79,25 @@ class BookingAvailability extends Component
         $this->selectedDate = $date;
         $this->loadBookedSlots();
         $this->dispatch('date-selected', date: $date);
+    }
+
+    public function setDateFromInput(string $date): void
+    {
+        if (!$date) {
+            $this->selectedDate = '';
+            $this->bookedSlots = [];
+            return;
+        }
+
+        $this->selectedDate = $date;
+
+        $targetMonth = \Carbon\Carbon::parse($date)->format('Y-m');
+        if ($this->currentMonth !== $targetMonth) {
+            $this->currentMonth = $targetMonth;
+            $this->loadBookedDates();
+        }
+
+        $this->loadBookedSlots();
     }
 
     public function previousMonth(): void
