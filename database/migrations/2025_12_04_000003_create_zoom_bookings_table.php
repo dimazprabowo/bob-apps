@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('guest_phone', 20)->nullable();
             $table->string('guest_divisi')->nullable();
             $table->string('guest_email')->nullable();
+            $table->string('guest_ip', 45)->nullable();
 
             // Booking details
             $table->string('topic');
