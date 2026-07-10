@@ -149,15 +149,15 @@
     <div class="mt-6 text-center">
         <p class="text-sm text-gray-500 dark:text-gray-400">
             @if(auth()->check())
-                <a href="{{ route('dashboard') }}" wire:navigate class="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors">Kembali ke Dashboard</a>
+                <x-navigate-link href="{{ route('dashboard') }}" color="blue">Kembali ke Dashboard</x-navigate-link>
             @else
-                <a href="{{ route('landing') }}" wire:navigate class="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors">Beranda</a>
+                <x-navigate-link href="{{ route('landing') }}" color="blue">Beranda</x-navigate-link>
                 <span class="mx-2 text-gray-300 dark:text-gray-600">|</span>
-                <a href="{{ route('login') }}" wire:navigate class="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors">Login</a>
+                <x-navigate-link href="{{ route('login') }}" color="blue">Login</x-navigate-link>
                 <span class="mx-2 text-gray-300 dark:text-gray-600">|</span>
-                <a href="{{ route('booking.zoom.form') }}" wire:navigate class="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors">Booking Zoom</a>
+                <x-navigate-link href="{{ route('booking.zoom.form') }}" color="blue">Booking Zoom</x-navigate-link>
                 <span class="mx-2 text-gray-300 dark:text-gray-600">|</span>
-                <a href="{{ route('booking.ruangan.form') }}" wire:navigate class="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors">Booking Ruangan</a>
+                <x-navigate-link href="{{ route('booking.ruangan.form') }}" color="blue">Booking Ruangan</x-navigate-link>
             @endif
         </p>
     </div>

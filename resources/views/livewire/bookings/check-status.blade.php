@@ -142,13 +142,13 @@
     {{-- Footer Links --}}
     <div class="mt-6 text-center">
         <p class="text-sm text-gray-500 dark:text-gray-400">
-            <a href="{{ route('landing') }}" wire:navigate class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium transition-colors">Beranda</a>
+            <x-navigate-link href="{{ route('landing') }}" color="indigo">Beranda</x-navigate-link>
             <span class="mx-2 text-gray-300 dark:text-gray-600">|</span>
-            <a href="{{ route('booking.armada.form') }}" wire:navigate class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium transition-colors">Booking Armada</a>
+            <x-navigate-link href="{{ route('booking.armada.form') }}" color="indigo">Booking Armada</x-navigate-link>
             <span class="mx-2 text-gray-300 dark:text-gray-600">|</span>
-            <a href="{{ route('booking.zoom.form') }}" wire:navigate class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium transition-colors">Booking Zoom</a>
+            <x-navigate-link href="{{ route('booking.zoom.form') }}" color="indigo">Booking Zoom</x-navigate-link>
             <span class="mx-2 text-gray-300 dark:text-gray-600">|</span>
-            <a href="{{ route('booking.ruangan.form') }}" wire:navigate class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium transition-colors">Booking Ruangan</a>
+            <x-navigate-link href="{{ route('booking.ruangan.form') }}" color="indigo">Booking Ruangan</x-navigate-link>
         </p>
     </div>
 </x-guest-booking-layout>

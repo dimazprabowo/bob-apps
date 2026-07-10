@@ -165,15 +165,15 @@
     <div class="mt-6 text-center">
         <p class="text-sm text-gray-500 dark:text-gray-400">
             @if(auth()->check())
-                <a href="{{ route('dashboard') }}" wire:navigate class="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium transition-colors">Kembali ke Dashboard</a>
+                <x-navigate-link href="{{ route('dashboard') }}" color="emerald">Kembali ke Dashboard</x-navigate-link>
             @else
-                <a href="{{ route('landing') }}" wire:navigate class="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium transition-colors">Beranda</a>
+                <x-navigate-link href="{{ route('landing') }}" color="emerald">Beranda</x-navigate-link>
                 <span class="mx-2 text-gray-300 dark:text-gray-600">|</span>
-                <a href="{{ route('login') }}" wire:navigate class="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium transition-colors">Login</a>
+                <x-navigate-link href="{{ route('login') }}" color="emerald">Login</x-navigate-link>
                 <span class="mx-2 text-gray-300 dark:text-gray-600">|</span>
-                <a href="{{ route('booking.armada.form') }}" wire:navigate class="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium transition-colors">Booking Armada</a>
+                <x-navigate-link href="{{ route('booking.armada.form') }}" color="emerald">Booking Armada</x-navigate-link>
                 <span class="mx-2 text-gray-300 dark:text-gray-600">|</span>
-                <a href="{{ route('booking.zoom.form') }}" wire:navigate class="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium transition-colors">Booking Zoom</a>
+                <x-navigate-link href="{{ route('booking.zoom.form') }}" color="emerald">Booking Zoom</x-navigate-link>
             @endif
         </p>
     </div>
