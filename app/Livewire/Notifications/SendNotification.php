@@ -100,31 +100,37 @@ class SendNotification extends Component
             throw $e;
         }
 
-        if ($this->target === 'all') {
-            NotificationService::sendToAll(
-                title: $this->title,
-                message: $this->notifMessage,
-                type: $this->type,
-                actionUrl: $this->actionUrl ?: null,
-            );
+        try {
+            if ($this->target === 'all') {
+                NotificationService::sendToAll(
+                    title: $this->title,
+                    message: $this->notifMessage,
+                    type: $this->type,
+                    actionUrl: $this->actionUrl ?: null,
+                );
 
-            $recipientCount = User::active()->count();
-            $this->notifySuccess("Notifikasi berhasil dikirim ke {$recipientCount} pengguna.");
-        } else {
-            NotificationService::sendToMany(
-                userIds: $this->selectedUserIds,
-                title: $this->title,
-                message: $this->notifMessage,
-                type: $this->type,
-                actionUrl: $this->actionUrl ?: null,
-            );
+                $recipientCount = User::active()->count();
+                $this->notifySuccess("Notifikasi berhasil dikirim ke {$recipientCount} pengguna.");
+            } else {
+                NotificationService::sendToMany(
+                    userIds: $this->selectedUserIds,
+                    title: $this->title,
+                    message: $this->notifMessage,
+                    type: $this->type,
+                    actionUrl: $this->actionUrl ?: null,
+                );
 
-            $recipientCount = count($this->selectedUserIds);
-            $this->notifySuccess("Notifikasi berhasil dikirim ke {$recipientCount} pengguna.");
+                $recipientCount = count($this->selectedUserIds);
+                $this->notifySuccess("Notifikasi berhasil dikirim ke {$recipientCount} pengguna.");
+            }
+
+            $this->resetForm();
+            $this->activeTab = 'history';
+        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+            $this->notifyError('Anda tidak memiliki izin untuk melakukan aksi ini.');
+        } catch (\Exception $e) {
+            $this->notifyError('Terjadi kesalahan sistem. Silakan coba lagi.');
         }
-
-        $this->resetForm();
-        $this->activeTab = 'history';
     }
 
     public function resetForm(): void
