@@ -357,7 +357,7 @@
     @endif
 
     <!-- Reset Password Modal -->
-    <x-reset-password-modal />
+    <x-reset-password-modal :show="$showResetPasswordModal" />
 
     <!-- Delete Confirmation Modal -->
     <x-delete-modal 

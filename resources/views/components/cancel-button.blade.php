@@ -30,7 +30,7 @@
 @if($target)
     <button
         x-data="{ loading: false }"
-        @click="loading = true"
+        @click="loading = true; setTimeout(() => loading = false, 300)"
         :disabled="loading"
         {{ $attributes->merge(['type' => 'button', 'class' => $baseClass]) }}
     >
