@@ -4,12 +4,14 @@ namespace App\Livewire\Bookings\Vehicle;
 
 use App\Enums\BookingStatus;
 use App\Enums\VehicleStatus;
+use App\Exceptions\BookingConflictException;
 use App\Exports\VehicleBookingsExport;
 use App\Livewire\Traits\HasNotification;
 use App\Models\Vehicle;
 use App\Models\VehicleBooking;
 use App\Services\VehicleBookingService;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
@@ -157,11 +159,6 @@ class VehicleBookingList extends Component
                 $booking = VehicleBooking::findOrFail($this->editingBookingId);
                 $this->authorize('update', $booking);
 
-                if ($service->checkConflict($this->vehicle_id, $this->booking_form_date, $this->duration, $booking->id)) {
-                    $this->notifyError('Kendaraan ini sudah dibooking pada rentang tanggal tersebut. Silakan pilih tanggal atau kendaraan lain.');
-                    return;
-                }
-
                 $service->updateBooking($booking, [
                     'vehicle_id' => $this->vehicle_id,
                     'booking_date' => $this->booking_form_date,
@@ -172,11 +169,6 @@ class VehicleBookingList extends Component
 
                 $this->notifySuccess('Booking armada berhasil diupdate! Kode booking: ' . $booking->booking_code);
             } else {
-                if ($service->checkConflict($this->vehicle_id, $this->booking_form_date, $this->duration)) {
-                    $this->notifyError('Kendaraan ini sudah dibooking pada rentang tanggal tersebut. Silakan pilih tanggal atau kendaraan lain.');
-                    return;
-                }
-
                 $booking = $service->createBooking([
                     'vehicle_id' => $this->vehicle_id,
                     'booking_date' => $this->booking_form_date,
@@ -193,6 +185,10 @@ class VehicleBookingList extends Component
             }
 
             $this->closeBookingModal();
+        } catch (BookingConflictException $e) {
+            $this->notifyError($e->getMessage());
+        } catch (LockTimeoutException $e) {
+            $this->notifyError('Sistem sedang memproses booking lain. Silakan coba lagi.');
         } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
             $this->notifyError('Anda tidak memiliki izin untuk melakukan aksi ini.');
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -390,6 +386,9 @@ class VehicleBookingList extends Component
 
     public function render(VehicleBookingService $service)
     {
+        $user = Auth::user();
+        $ownOnly = !$user->can('vehicle_bookings_view') && $user->can('vehicle_bookings_view_own');
+
         $bookings = $service->getFilteredBookings(
             $this->search,
             $this->statusFilter,
@@ -397,7 +396,9 @@ class VehicleBookingList extends Component
             $this->dateFrom,
             $this->dateTo,
             15,
-            true
+            true,
+            $user,
+            $ownOnly
         );
 
         if ($this->filterChanged) {

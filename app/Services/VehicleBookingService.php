@@ -10,7 +10,10 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
+use App\Exceptions\BookingConflictException;
 use App\Services\Traits\SanitizesInput;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class VehicleBookingService
 {
@@ -26,9 +29,15 @@ class VehicleBookingService
         ?string $dateFrom = null,
         ?string $dateTo = null,
         int $perPage = 15,
-        bool $activeOnly = false
+        bool $activeOnly = false,
+        ?User $user = null,
+        bool $ownOnly = false
     ): LengthAwarePaginator {
         $query = VehicleBooking::with(['vehicle', 'user', 'approver']);
+
+        if ($ownOnly && $user) {
+            $query->where('user_id', $user->id);
+        }
 
         if ($activeOnly) {
             if (!$status) {
@@ -142,33 +151,66 @@ class VehicleBookingService
         return array_unique($bookedDates);
     }
 
-    public function createBooking(array $data, ?User $user = null): VehicleBooking
+    public function createBooking(array $data, ?User $user = null, ?int $excludeBookingId = null): VehicleBooking
     {
-        $booking = VehicleBooking::create([
-            'booking_code' => VehicleBooking::generateBookingCode(),
-            'vehicle_id' => $data['vehicle_id'],
-            'user_id' => $user?->id,
-            'guest_name' => $user ? null : ($this->sanitize($data['guest_name'] ?? null)),
-            'guest_phone' => $user ? null : ($this->sanitize($data['guest_phone'] ?? null)),
-            'guest_divisi' => $user ? null : ($this->sanitize($data['guest_divisi'] ?? null)),
-            'guest_email' => $user ? null : ($this->sanitize($data['guest_email'] ?? null)),
-            'guest_ip' => $user ? null : ($data['guest_ip'] ?? null),
-            'booking_date' => $data['booking_date'],
-            'duration' => $data['duration'] ?? 1,
-            'destination' => $this->sanitize($data['destination']),
-            'notes' => $this->sanitize($data['notes'] ?? null),
-            'status' => BookingStatus::Pending,
-        ]);
+        $vehicleId = (int) $data['vehicle_id'];
+        $lock = Cache::lock("vehicle-booking-create-{$vehicleId}", 10);
 
-        $this->notifyBookingCreated($booking);
+        try {
+            $lock->block(5);
 
-        return $booking;
+            $booking = DB::transaction(function () use ($data, $user, $excludeBookingId, $vehicleId) {
+                if ($this->checkConflict($vehicleId, $data['booking_date'], $data['duration'] ?? 1, $excludeBookingId)) {
+                    throw BookingConflictException::vehicle();
+                }
+
+                return VehicleBooking::create([
+                    'booking_code' => VehicleBooking::generateBookingCode(),
+                    'vehicle_id' => $vehicleId,
+                    'user_id' => $user?->id,
+                    'guest_name' => $user ? null : ($this->sanitize($data['guest_name'] ?? null)),
+                    'guest_phone' => $user ? null : ($this->sanitize($data['guest_phone'] ?? null)),
+                    'guest_divisi' => $user ? null : ($this->sanitize($data['guest_divisi'] ?? null)),
+                    'guest_email' => $user ? null : ($this->sanitize($data['guest_email'] ?? null)),
+                    'guest_ip' => $user ? null : ($data['guest_ip'] ?? null),
+                    'booking_date' => $data['booking_date'],
+                    'duration' => $data['duration'] ?? 1,
+                    'destination' => $this->sanitize($data['destination']),
+                    'notes' => $this->sanitize($data['notes'] ?? null),
+                    'status' => BookingStatus::Pending,
+                ]);
+            });
+
+            $this->notifyBookingCreated($booking);
+
+            return $booking;
+        } finally {
+            $lock->release();
+        }
     }
 
     public function updateBooking(VehicleBooking $booking, array $data): VehicleBooking
     {
-        $booking->update($data);
-        return $booking->fresh();
+        $vehicleId = (int) ($data['vehicle_id'] ?? $booking->vehicle_id);
+        $lock = Cache::lock("vehicle-booking-update-{$vehicleId}", 10);
+
+        try {
+            $lock->block(5);
+
+            return DB::transaction(function () use ($booking, $data, $vehicleId) {
+                $bookingDate = $data['booking_date'] ?? $booking->booking_date->format('Y-m-d');
+                $duration = $data['duration'] ?? $booking->duration;
+
+                if ($this->checkConflict($vehicleId, $bookingDate, $duration, $booking->id)) {
+                    throw BookingConflictException::vehicle();
+                }
+
+                $booking->update($data);
+                return $booking->fresh();
+            });
+        } finally {
+            $lock->release();
+        }
     }
 
     public function approveBooking(VehicleBooking $booking, User $approver, ?string $driver = null, ?string $notes = null): VehicleBooking

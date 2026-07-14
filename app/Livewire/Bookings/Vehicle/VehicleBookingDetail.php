@@ -21,7 +21,7 @@ class VehicleBookingDetail extends Component
 
     public function mount(VehicleBooking $booking)
     {
-        $this->authorize('viewAny', VehicleBooking::class);
+        $this->authorize('view', $booking);
         $this->booking = $booking->load(['vehicle', 'user', 'approver']);
     }
 

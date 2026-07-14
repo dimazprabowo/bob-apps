@@ -3,11 +3,13 @@
 namespace App\Livewire\Bookings\Zoom;
 
 use App\Enums\BookingStatus;
+use App\Exceptions\BookingConflictException;
 use App\Exports\ZoomBookingsExport;
 use App\Livewire\Traits\HasNotification;
 use App\Models\ZoomBooking;
 use App\Services\ZoomBookingService;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
@@ -153,11 +155,6 @@ class ZoomBookingList extends Component
                 $booking = ZoomBooking::findOrFail($this->editingBookingId);
                 $this->authorize('update', $booking);
 
-                if ($service->checkConflict($this->booking_form_date, $this->start_time, $this->end_time, $booking->id)) {
-                    $this->notifyError('Sudah ada booking meeting pada waktu tersebut. Silakan pilih waktu lain.');
-                    return;
-                }
-
                 $service->updateBooking($booking, [
                     'topic' => $this->topic,
                     'booking_date' => $this->booking_form_date,
@@ -169,11 +166,6 @@ class ZoomBookingList extends Component
 
                 $this->notifySuccess('Booking meeting online berhasil diupdate! Kode booking: ' . $booking->booking_code);
             } else {
-                if ($service->checkConflict($this->booking_form_date, $this->start_time, $this->end_time)) {
-                    $this->notifyError('Sudah ada booking meeting pada waktu tersebut. Silakan pilih waktu lain.');
-                    return;
-                }
-
                 $booking = $service->createBooking([
                     'topic' => $this->topic,
                     'booking_date' => $this->booking_form_date,
@@ -191,6 +183,10 @@ class ZoomBookingList extends Component
             }
 
             $this->closeBookingModal();
+        } catch (BookingConflictException $e) {
+            $this->notifyError($e->getMessage());
+        } catch (LockTimeoutException $e) {
+            $this->notifyError('Sistem sedang memproses booking lain. Silakan coba lagi.');
         } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
             $this->notifyError('Anda tidak memiliki izin untuk melakukan aksi ini.');
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -339,7 +335,10 @@ class ZoomBookingList extends Component
 
     public function render(ZoomBookingService $service)
     {
-        $bookings = $service->getFilteredBookings($this->search, $this->statusFilter, $this->dateFrom, $this->dateTo, 15, true);
+        $user = Auth::user();
+        $ownOnly = !$user->can('zoom_bookings_view') && $user->can('zoom_bookings_view_own');
+
+        $bookings = $service->getFilteredBookings($this->search, $this->statusFilter, $this->dateFrom, $this->dateTo, 15, true, $user, $ownOnly);
         if ($this->filterChanged) {
             $this->notifySuccess("Ditemukan {$bookings->total()} data booking.");
             $this->filterChanged = false;

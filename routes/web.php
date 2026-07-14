@@ -43,22 +43,22 @@ Route::middleware(['auth', 'verified', 'active'])->group(function () {
     // Booking Management Routes (authenticated — for admin/approver)
     Route::prefix('bookings')->name('bookings.')->group(function () {
         // Vehicle Bookings
-        Route::view('/armada', 'bookings.armada')->middleware('can:vehicle_bookings_view')->name('armada.index');
+        Route::view('/armada', 'bookings.armada')->middleware('can:vehicle_bookings_view,vehicle_bookings_view_own')->name('armada.index');
         Route::get('/armada/{booking}', function (VehicleBooking $booking) {
             return view('bookings.armada-detail', ['booking' => $booking]);
-        })->middleware('can:vehicle_bookings_view')->name('armada.show');
+        })->middleware('can:vehicle_bookings_show,vehicle_bookings_show_own')->name('armada.show');
 
         // Zoom Bookings
-        Route::view('/zoom', 'bookings.zoom')->middleware('can:zoom_bookings_view')->name('zoom.index');
+        Route::view('/zoom', 'bookings.zoom')->middleware('can:zoom_bookings_view,zoom_bookings_view_own')->name('zoom.index');
         Route::get('/zoom/{booking}', function (ZoomBooking $booking) {
             return view('bookings.zoom-detail', ['booking' => $booking]);
-        })->middleware('can:zoom_bookings_view')->name('zoom.show');
+        })->middleware('can:zoom_bookings_show,zoom_bookings_show_own')->name('zoom.show');
 
         // Room Bookings
-        Route::view('/ruangan', 'bookings.ruangan')->middleware('can:room_bookings_view')->name('ruangan.index');
+        Route::view('/ruangan', 'bookings.ruangan')->middleware('can:room_bookings_view,room_bookings_view_own')->name('ruangan.index');
         Route::get('/ruangan/{booking}', function (RoomBooking $booking) {
             return view('bookings.ruangan-detail', ['booking' => $booking]);
-        })->middleware('can:room_bookings_view')->name('ruangan.show');
+        })->middleware('can:room_bookings_show,room_bookings_show_own')->name('ruangan.show');
     });
 
     // Reporting Routes

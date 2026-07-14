@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Str;
 
 class VehicleBooking extends Model
 {
@@ -109,7 +110,7 @@ class VehicleBooking extends Model
 
     public static function generateBookingCode(): string
     {
-        return 'VB-' . now()->format('YmdHis');
+        return 'VB-' . now()->format('YmdHis') . '-' . Str::upper(Str::random(4));
     }
 
     public function getRouteKey()

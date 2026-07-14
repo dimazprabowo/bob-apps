@@ -20,7 +20,7 @@ class RoomBookingDetail extends Component
 
     public function mount(RoomBooking $booking)
     {
-        $this->authorize('viewAny', RoomBooking::class);
+        $this->authorize('view', $booking);
         $this->booking = $booking->load(['room', 'user', 'approver']);
     }
 

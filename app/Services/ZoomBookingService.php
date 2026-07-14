@@ -8,7 +8,10 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
+use App\Exceptions\BookingConflictException;
 use App\Services\Traits\SanitizesInput;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class ZoomBookingService
 {
@@ -23,9 +26,15 @@ class ZoomBookingService
         ?string $dateFrom = null,
         ?string $dateTo = null,
         int $perPage = 15,
-        bool $activeOnly = false
+        bool $activeOnly = false,
+        ?User $user = null,
+        bool $ownOnly = false
     ): LengthAwarePaginator {
         $query = ZoomBooking::with(['user', 'approver']);
+
+        if ($ownOnly && $user) {
+            $query->where('user_id', $user->id);
+        }
 
         if ($activeOnly) {
             if (!$status) {
@@ -103,34 +112,66 @@ class ZoomBookingService
         return $dates->map(fn ($d) => $d instanceof \Carbon\Carbon ? $d->format('Y-m-d') : substr((string)$d, 0, 10))->unique()->toArray();
     }
 
-    public function createBooking(array $data, ?User $user = null): ZoomBooking
+    public function createBooking(array $data, ?User $user = null, ?int $excludeBookingId = null): ZoomBooking
     {
-        $booking = ZoomBooking::create([
-            'booking_code' => ZoomBooking::generateBookingCode(),
-            'user_id' => $user?->id,
-            'guest_name' => $user ? null : ($this->sanitize($data['guest_name'] ?? null)),
-            'guest_phone' => $user ? null : ($this->sanitize($data['guest_phone'] ?? null)),
-            'guest_divisi' => $user ? null : ($this->sanitize($data['guest_divisi'] ?? null)),
-            'guest_email' => $user ? null : ($this->sanitize($data['guest_email'] ?? null)),
-            'guest_ip' => $user ? null : ($data['guest_ip'] ?? null),
-            'topic' => $this->sanitize($data['topic']),
-            'booking_date' => $data['booking_date'],
-            'start_time' => $data['start_time'],
-            'end_time' => $data['end_time'],
-            'platform' => $data['platform'] ?? 'Zoom',
-            'notes' => $this->sanitize($data['notes'] ?? null),
-            'status' => BookingStatus::Pending,
-        ]);
+        $lock = Cache::lock('zoom-booking-create', 10);
 
-        $this->notifyBookingCreated($booking);
+        try {
+            $lock->block(5);
 
-        return $booking;
+            $booking = DB::transaction(function () use ($data, $user, $excludeBookingId) {
+                if ($this->checkConflict($data['booking_date'], $data['start_time'], $data['end_time'], $excludeBookingId)) {
+                    throw BookingConflictException::zoom();
+                }
+
+                return ZoomBooking::create([
+                    'booking_code' => ZoomBooking::generateBookingCode(),
+                    'user_id' => $user?->id,
+                    'guest_name' => $user ? null : ($this->sanitize($data['guest_name'] ?? null)),
+                    'guest_phone' => $user ? null : ($this->sanitize($data['guest_phone'] ?? null)),
+                    'guest_divisi' => $user ? null : ($this->sanitize($data['guest_divisi'] ?? null)),
+                    'guest_email' => $user ? null : ($this->sanitize($data['guest_email'] ?? null)),
+                    'guest_ip' => $user ? null : ($data['guest_ip'] ?? null),
+                    'topic' => $this->sanitize($data['topic']),
+                    'booking_date' => $data['booking_date'],
+                    'start_time' => $data['start_time'],
+                    'end_time' => $data['end_time'],
+                    'platform' => $data['platform'] ?? 'Zoom',
+                    'notes' => $this->sanitize($data['notes'] ?? null),
+                    'status' => BookingStatus::Pending,
+                ]);
+            });
+
+            $this->notifyBookingCreated($booking);
+
+            return $booking;
+        } finally {
+            $lock->release();
+        }
     }
 
     public function updateBooking(ZoomBooking $booking, array $data): ZoomBooking
     {
-        $booking->update($data);
-        return $booking->fresh();
+        $lock = Cache::lock('zoom-booking-update', 10);
+
+        try {
+            $lock->block(5);
+
+            return DB::transaction(function () use ($booking, $data) {
+                $bookingDate = $data['booking_date'] ?? $booking->booking_date->format('Y-m-d');
+                $startTime = $data['start_time'] ?? $booking->start_time->format('H:i');
+                $endTime = $data['end_time'] ?? $booking->end_time->format('H:i');
+
+                if ($this->checkConflict($bookingDate, $startTime, $endTime, $booking->id)) {
+                    throw BookingConflictException::zoom();
+                }
+
+                $booking->update($data);
+                return $booking->fresh();
+            });
+        } finally {
+            $lock->release();
+        }
     }
 
     public function approveBooking(ZoomBooking $booking, User $approver, ?string $meetingLink = null, ?string $notes = null): ZoomBooking

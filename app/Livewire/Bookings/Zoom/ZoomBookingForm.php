@@ -2,10 +2,12 @@
 
 namespace App\Livewire\Bookings\Zoom;
 
+use App\Exceptions\BookingConflictException;
 use App\Livewire\Traits\HasGuestBooking;
 use App\Livewire\Traits\HasNotification;
 use App\Models\ZoomBooking;
 use App\Services\ZoomBookingService;
+use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
@@ -98,11 +100,6 @@ class ZoomBookingForm extends Component
         try {
             $user = Auth::user();
 
-            if ($service->checkConflict($this->booking_date, $this->start_time, $this->end_time)) {
-                $this->notifyError('Sudah ada booking meeting pada waktu tersebut. Silakan pilih waktu lain.');
-                return;
-            }
-
             $booking = $service->createBooking(array_merge([
                 'topic' => $this->topic,
                 'booking_date' => $this->booking_date,
@@ -118,6 +115,10 @@ class ZoomBookingForm extends Component
             $this->resetGuestFields();
             $this->platform = 'Zoom';
             $this->notifySuccess('Booking meeting online berhasil diajukan! Kode booking: ' . $booking->booking_code);
+        } catch (BookingConflictException $e) {
+            $this->notifyError($e->getMessage());
+        } catch (LockTimeoutException $e) {
+            $this->notifyError('Sistem sedang memproses booking lain. Silakan coba lagi.');
         } catch (\Throwable $e) {
             $this->logBookingError('Zoom', $e);
             $this->notifyError('Terjadi kesalahan sistem. Silakan coba lagi.');

@@ -21,7 +21,7 @@ class ZoomBookingDetail extends Component
 
     public function mount(ZoomBooking $booking)
     {
-        $this->authorize('viewAny', ZoomBooking::class);
+        $this->authorize('view', $booking);
         $this->booking = $booking->load(['user', 'approver']);
     }
 

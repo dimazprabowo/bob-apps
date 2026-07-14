@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Str;
 
 class RoomBooking extends Model
 {
@@ -102,7 +103,7 @@ class RoomBooking extends Model
 
     public static function generateBookingCode(): string
     {
-        return 'RB-' . now()->format('YmdHis');
+        return 'RB-' . now()->format('YmdHis') . '-' . Str::upper(Str::random(4));
     }
 
     public function getRouteKey()

@@ -10,7 +10,10 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
+use App\Exceptions\BookingConflictException;
 use App\Services\Traits\SanitizesInput;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class RoomBookingService
 {
@@ -26,9 +29,15 @@ class RoomBookingService
         ?string $dateFrom = null,
         ?string $dateTo = null,
         int $perPage = 15,
-        bool $activeOnly = false
+        bool $activeOnly = false,
+        ?User $user = null,
+        bool $ownOnly = false
     ): LengthAwarePaginator {
         $query = RoomBooking::with(['room', 'user', 'approver']);
+
+        if ($ownOnly && $user) {
+            $query->where('user_id', $user->id);
+        }
 
         if ($activeOnly) {
             if (!$status) {
@@ -114,35 +123,69 @@ class RoomBookingService
         return $dates->map(fn ($d) => $d instanceof \Carbon\Carbon ? $d->format('Y-m-d') : substr((string)$d, 0, 10))->unique()->toArray();
     }
 
-    public function createBooking(array $data, ?User $user = null): RoomBooking
+    public function createBooking(array $data, ?User $user = null, ?int $excludeBookingId = null): RoomBooking
     {
-        $booking = RoomBooking::create([
-            'booking_code' => RoomBooking::generateBookingCode(),
-            'room_id' => $data['room_id'],
-            'user_id' => $user?->id,
-            'guest_name' => $user ? null : ($this->sanitize($data['guest_name'] ?? null)),
-            'guest_phone' => $user ? null : ($this->sanitize($data['guest_phone'] ?? null)),
-            'guest_divisi' => $user ? null : ($this->sanitize($data['guest_divisi'] ?? null)),
-            'guest_email' => $user ? null : ($this->sanitize($data['guest_email'] ?? null)),
-            'guest_ip' => $user ? null : ($data['guest_ip'] ?? null),
-            'booking_date' => $data['booking_date'],
-            'start_time' => $data['start_time'],
-            'end_time' => $data['end_time'],
-            'purpose' => $this->sanitize($data['purpose']),
-            'participants' => $data['participants'] ?? 1,
-            'notes' => $this->sanitize($data['notes'] ?? null),
-            'status' => BookingStatus::Pending,
-        ]);
+        $roomId = (int) $data['room_id'];
+        $lock = Cache::lock("room-booking-create-{$roomId}", 10);
 
-        $this->notifyBookingCreated($booking);
+        try {
+            $lock->block(5);
 
-        return $booking;
+            $booking = DB::transaction(function () use ($data, $user, $excludeBookingId, $roomId) {
+                if ($this->checkConflict($roomId, $data['booking_date'], $data['start_time'], $data['end_time'], $excludeBookingId)) {
+                    throw BookingConflictException::room();
+                }
+
+                return RoomBooking::create([
+                    'booking_code' => RoomBooking::generateBookingCode(),
+                    'room_id' => $roomId,
+                    'user_id' => $user?->id,
+                    'guest_name' => $user ? null : ($this->sanitize($data['guest_name'] ?? null)),
+                    'guest_phone' => $user ? null : ($this->sanitize($data['guest_phone'] ?? null)),
+                    'guest_divisi' => $user ? null : ($this->sanitize($data['guest_divisi'] ?? null)),
+                    'guest_email' => $user ? null : ($this->sanitize($data['guest_email'] ?? null)),
+                    'guest_ip' => $user ? null : ($data['guest_ip'] ?? null),
+                    'booking_date' => $data['booking_date'],
+                    'start_time' => $data['start_time'],
+                    'end_time' => $data['end_time'],
+                    'purpose' => $this->sanitize($data['purpose']),
+                    'participants' => $data['participants'] ?? 1,
+                    'notes' => $this->sanitize($data['notes'] ?? null),
+                    'status' => BookingStatus::Pending,
+                ]);
+            });
+
+            $this->notifyBookingCreated($booking);
+
+            return $booking;
+        } finally {
+            $lock->release();
+        }
     }
 
     public function updateBooking(RoomBooking $booking, array $data): RoomBooking
     {
-        $booking->update($data);
-        return $booking->fresh();
+        $roomId = (int) ($data['room_id'] ?? $booking->room_id);
+        $lock = Cache::lock("room-booking-update-{$roomId}", 10);
+
+        try {
+            $lock->block(5);
+
+            return DB::transaction(function () use ($booking, $data, $roomId) {
+                $bookingDate = $data['booking_date'] ?? $booking->booking_date->format('Y-m-d');
+                $startTime = $data['start_time'] ?? $booking->start_time->format('H:i');
+                $endTime = $data['end_time'] ?? $booking->end_time->format('H:i');
+
+                if ($this->checkConflict($roomId, $bookingDate, $startTime, $endTime, $booking->id)) {
+                    throw BookingConflictException::room();
+                }
+
+                $booking->update($data);
+                return $booking->fresh();
+            });
+        } finally {
+            $lock->release();
+        }
     }
 
     public function approveBooking(RoomBooking $booking, User $approver, ?string $notes = null): RoomBooking

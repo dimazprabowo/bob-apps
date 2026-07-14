@@ -9,7 +9,20 @@ class ZoomBookingPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->can('zoom_bookings_view');
+        return $user->can('zoom_bookings_view') || $user->can('zoom_bookings_view_own');
+    }
+
+    public function view(User $user, ZoomBooking $booking): bool
+    {
+        if ($user->can('zoom_bookings_show')) {
+            return true;
+        }
+
+        if ($user->can('zoom_bookings_show_own')) {
+            return $booking->user_id === $user->id;
+        }
+
+        return false;
     }
 
     public function create(User $user): bool
@@ -23,7 +36,11 @@ class ZoomBookingPolicy
             return true;
         }
 
-        return $booking->user_id === $user->id;
+        if ($user->can('zoom_bookings_update_own')) {
+            return $booking->user_id === $user->id;
+        }
+
+        return false;
     }
 
     public function delete(User $user, ZoomBooking $booking): bool
@@ -32,7 +49,11 @@ class ZoomBookingPolicy
             return true;
         }
 
-        return $booking->user_id === $user->id;
+        if ($user->can('zoom_bookings_delete_own')) {
+            return $booking->user_id === $user->id;
+        }
+
+        return false;
     }
 
     public function approve(User $user, ZoomBooking $booking): bool

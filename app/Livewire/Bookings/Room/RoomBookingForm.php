@@ -3,11 +3,13 @@
 namespace App\Livewire\Bookings\Room;
 
 use App\Enums\RoomStatus;
+use App\Exceptions\BookingConflictException;
 use App\Livewire\Traits\HasGuestBooking;
 use App\Livewire\Traits\HasNotification;
 use App\Models\Room;
 use App\Models\RoomBooking;
 use App\Services\RoomBookingService;
+use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
@@ -105,11 +107,6 @@ class RoomBookingForm extends Component
         try {
             $user = Auth::user();
 
-            if ($service->checkConflict($this->room_id, $this->booking_date, $this->start_time, $this->end_time)) {
-                $this->notifyError('Ruangan sudah dibooking pada waktu tersebut. Silakan pilih waktu atau ruangan lain.');
-                return;
-            }
-
             $booking = $service->createBooking(array_merge([
                 'room_id' => $this->room_id,
                 'booking_date' => $this->booking_date,
@@ -126,6 +123,10 @@ class RoomBookingForm extends Component
             $this->resetGuestFields();
             $this->participants = 1;
             $this->notifySuccess('Booking ruangan berhasil diajukan! Kode booking: ' . $booking->booking_code);
+        } catch (BookingConflictException $e) {
+            $this->notifyError($e->getMessage());
+        } catch (LockTimeoutException $e) {
+            $this->notifyError('Sistem sedang memproses booking lain. Silakan coba lagi.');
         } catch (\Throwable $e) {
             $this->logBookingError('Room', $e);
             $this->notifyError('Terjadi kesalahan sistem. Silakan coba lagi.');

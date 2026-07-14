@@ -3,11 +3,13 @@
 namespace App\Livewire\Bookings\Vehicle;
 
 use App\Enums\VehicleStatus;
+use App\Exceptions\BookingConflictException;
 use App\Livewire\Traits\HasGuestBooking;
 use App\Livewire\Traits\HasNotification;
 use App\Models\Vehicle;
 use App\Models\VehicleBooking;
 use App\Services\VehicleBookingService;
+use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -104,11 +106,6 @@ class VehicleBookingForm extends Component
         try {
             $user = Auth::user();
 
-            if ($service->checkConflict($this->vehicle_id, $this->booking_date, $this->duration)) {
-                $this->notifyError('Kendaraan ini sudah dibooking pada rentang tanggal tersebut. Silakan pilih tanggal atau kendaraan lain.');
-                return;
-            }
-
             $booking = $service->createBooking(array_merge([
                 'vehicle_id' => $this->vehicle_id,
                 'booking_date' => $this->booking_date,
@@ -122,6 +119,10 @@ class VehicleBookingForm extends Component
             $this->reset(['vehicle_id', 'booking_date', 'duration', 'destination', 'notes']);
             $this->resetGuestFields();
             $this->notifySuccess('Booking armada berhasil diajukan! Kode booking: ' . $booking->booking_code);
+        } catch (BookingConflictException $e) {
+            $this->notifyError($e->getMessage());
+        } catch (LockTimeoutException $e) {
+            $this->notifyError('Sistem sedang memproses booking lain. Silakan coba lagi.');
         } catch (\Throwable $e) {
             $this->logBookingError('Vehicle', $e);
             $this->notifyError('Terjadi kesalahan sistem. Silakan coba lagi.');

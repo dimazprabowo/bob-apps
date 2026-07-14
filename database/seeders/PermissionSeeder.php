@@ -54,28 +54,43 @@ class PermissionSeeder extends Seeder
             'rooms_export_pdf',
 
             // Booking Armada (Vehicle Bookings)
-            'vehicle_bookings_view',
+            'vehicle_bookings_view',        // lihat list semua data
+            'vehicle_bookings_view_own',    // lihat list data sendiri saja
+            'vehicle_bookings_show',        // lihat detail semua booking
+            'vehicle_bookings_show_own',    // lihat detail booking sendiri
             'vehicle_bookings_create',
-            'vehicle_bookings_update',
-            'vehicle_bookings_delete',
+            'vehicle_bookings_update',      // edit semua data
+            'vehicle_bookings_update_own',  // edit data sendiri saja
+            'vehicle_bookings_delete',      // hapus semua data
+            'vehicle_bookings_delete_own',  // hapus data sendiri saja
             'vehicle_bookings_approve',
             'vehicle_bookings_export_excel',
             'vehicle_bookings_export_pdf',
 
             // Booking Zoom (Zoom Bookings)
             'zoom_bookings_view',
+            'zoom_bookings_view_own',
+            'zoom_bookings_show',
+            'zoom_bookings_show_own',
             'zoom_bookings_create',
             'zoom_bookings_update',
+            'zoom_bookings_update_own',
             'zoom_bookings_delete',
+            'zoom_bookings_delete_own',
             'zoom_bookings_approve',
             'zoom_bookings_export_excel',
             'zoom_bookings_export_pdf',
 
             // Booking Ruangan (Room Bookings)
             'room_bookings_view',
+            'room_bookings_view_own',
+            'room_bookings_show',
+            'room_bookings_show_own',
             'room_bookings_create',
             'room_bookings_update',
+            'room_bookings_update_own',
             'room_bookings_delete',
+            'room_bookings_delete_own',
             'room_bookings_approve',
             'room_bookings_export_excel',
             'room_bookings_export_pdf',
